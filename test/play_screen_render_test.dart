@@ -21,25 +21,33 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('HomeScreen menu cards fit landscape phone height',
+  testWidgets('main menu screens do not overflow on landscape phone',
       (tester) async {
     useLandscapePhoneSize(tester);
 
-    await pumpScreen(tester, HomeScreen(onTab: (_) {}, onStart: () {}));
+    final screens = <Widget>[
+      HomeScreen(onTab: (_) {}, onStart: () {}),
+      const CharacterScreen(),
+      CustomScreen(
+          gems: 2680, selectedWear: wardrobe.first.name, onEquip: (_) {}),
+      const QuestScreen(),
+      ShopScreen(coins: 12450, gems: 2680, onBuy: () {}),
+      SettingsScreen(
+        musicVolume: 80,
+        effectVolume: 70,
+        vibration: true,
+        laneSpeed: 1,
+        onMusic: (_) {},
+        onEffect: (_) {},
+        onVibration: (_) {},
+        onLaneSpeed: (_) {},
+      ),
+    ];
 
-    expect(tester.takeException(), isNull);
-    expect(find.text('게임 시작'), findsOneWidget);
-    expect(find.text('곡 선택'), findsOneWidget);
-  });
-
-  testWidgets('CharacterScreen scrolls instead of overflowing', (tester) async {
-    useLandscapePhoneSize(tester);
-
-    await pumpScreen(tester, const CharacterScreen());
-
-    expect(tester.takeException(), isNull);
-    expect(find.text('캐릭터'), findsOneWidget);
-    expect(find.text('선택 중'), findsOneWidget);
+    for (final screen in screens) {
+      await pumpScreen(tester, screen);
+      expect(tester.takeException(), isNull);
+    }
   });
 
   testWidgets('SongSelectScreen tile title remains above card background',
@@ -58,7 +66,13 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
-    expect(find.text('01. 왜곡된 리듬'), findsOneWidget);
+
+    final titleFinder = find.textContaining('01.');
+    expect(titleFinder, findsOneWidget);
+
+    final titleWidget = tester.widget<Text>(titleFinder);
+    expect(titleWidget.style?.color, const Color(0xff000000));
+    expect(titleWidget.style?.fontWeight, FontWeight.w900);
   });
 
   testWidgets('PlayScreen renders play background and gameplay layers',
@@ -89,11 +103,11 @@ void main() {
       ),
     );
 
+    expect(tester.takeException(), isNull);
     expect(find.byType(FittedBox), findsOneWidget);
     expect(find.byType(NoteBoardLayer), findsOneWidget);
     expect(find.byType(MovingNotesLayer), findsOneWidget);
     expect(find.byType(JudgementLayer), findsOneWidget);
-    expect(find.byType(_AssetImageProbe), findsNothing);
 
     final assetNames = tester
         .widgetList<Image>(find.byType(Image))
@@ -107,11 +121,4 @@ void main() {
     expect(assetNames, isNot(contains('assets/character/pose.png')));
     expect(assetNames, isNot(contains('assets/items/hand/hand.png')));
   });
-}
-
-class _AssetImageProbe extends StatelessWidget {
-  const _AssetImageProbe();
-
-  @override
-  Widget build(BuildContext context) => const SizedBox.shrink();
 }

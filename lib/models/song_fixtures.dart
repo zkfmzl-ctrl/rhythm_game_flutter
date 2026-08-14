@@ -5,7 +5,7 @@ const songs = [
     id: 1,
     title: '\uC65C\uACE1\uB41C \uB9AC\uB4EC',
     subtitle: '\uB9AC\uB4EC\uC73C\uB85C \uAE68\uC5B4\uB09C \uB098',
-    thumbnailAsset: 'assets/sketch/song-thumb-1.png',
+    thumbnailAsset: 'assets/sketch/song-art-large.png',
     bpm: 148,
     isLocked: false,
     difficulties: {
@@ -23,7 +23,7 @@ const songs = [
     id: 2,
     title: '\uC18D\uC0AD\uC784\uC758 \uBBF8\uB85C',
     subtitle: '\uC18D\uC0AD\uC784\uC774 \uD750\uB974\uB294 \uAE38',
-    thumbnailAsset: 'assets/sketch/song-thumb-2.png',
+    thumbnailAsset: 'assets/sketch/song-art-large.png',
     bpm: 132,
     isLocked: true,
     difficulties: {
@@ -37,7 +37,7 @@ const songs = [
     id: 3,
     title: '\uBD80\uC11C\uC9C4 \uAE30\uC5B5',
     subtitle: '\uC870\uAC01\uB09C \uAE30\uC5B5\uC758 \uC794\uD5A5',
-    thumbnailAsset: 'assets/sketch/song-thumb-3.png',
+    thumbnailAsset: 'assets/sketch/song-art-large.png',
     bpm: 116,
     isLocked: true,
     difficulties: {
@@ -51,7 +51,7 @@ const songs = [
     id: 4,
     title: '\uB05D\uC5C6\uB294 \uD130\uB110',
     subtitle: '\uCD9C\uAD6C \uC5C6\uB294 \uAE34 \uD130\uB110',
-    thumbnailAsset: 'assets/sketch/song-thumb-1.png',
+    thumbnailAsset: 'assets/sketch/song-art-large.png',
     bpm: 172,
     isLocked: true,
     difficulties: {
@@ -65,7 +65,7 @@ const songs = [
     id: 5,
     title: '\uCE68\uBB35\uC758 \uC678\uCE68',
     subtitle: '\uCE68\uBB35 \uC18D\uC758 \uB9C8\uC9C0\uB9C9 \uC678\uCE68',
-    thumbnailAsset: 'assets/sketch/song-thumb-2.png',
+    thumbnailAsset: 'assets/sketch/song-art-large.png',
     bpm: 154,
     isLocked: true,
     difficulties: {

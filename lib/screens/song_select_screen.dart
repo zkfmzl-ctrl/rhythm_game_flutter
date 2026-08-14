@@ -167,11 +167,14 @@ class _SongSelectTile extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset(frameAsset, fit: BoxFit.fill),
+            Opacity(
+              opacity: 0.18,
+              child: Image.asset(frameAsset, fit: BoxFit.fill),
+            ),
             ColoredBox(
               color: song.isLocked
-                  ? const Color(0xcce8e4d8)
-                  : const Color(0xdffff8e7),
+                  ? const Color(0xf2e8e4d8)
+                  : const Color(0xf7fff8e7),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
@@ -197,7 +200,7 @@ class _SongSelectTile extends StatelessWidget {
                   Expanded(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: const Color(0xfffff8e7),
+                        color: const Color(0xfffffff7),
                         border: Border.all(
                           color: Colors.black.withValues(alpha: 0.55),
                         ),
@@ -216,13 +219,12 @@ class _SongSelectTile extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                     fontSize: 14,
-                                    color: Color(0xff050505),
+                                    color: Color(0xff000000),
                                     fontWeight: FontWeight.w900,
                                     shadows: [
                                       Shadow(
-                                        color: Colors.white,
-                                        blurRadius: 2,
-                                        offset: Offset(0, 1),
+                                        color: Color(0xffffffff),
+                                        blurRadius: 1.5,
                                       ),
                                     ])),
                             const SizedBox(height: 3),
