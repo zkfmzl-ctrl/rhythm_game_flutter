@@ -102,7 +102,7 @@ void main() {
         .map((image) => image.assetName)
         .toSet();
 
-    expect(assetNames, contains('assets/backgrounds/play.png'));
+    expect(assetNames, contains('assets/backgrounds/play2.png'));
     expect(assetNames, contains('assets/character/character_01.png'));
     expect(assetNames, isNot(contains('assets/character/pose.png')));
     expect(assetNames, isNot(contains('assets/items/hand/hand.png')));

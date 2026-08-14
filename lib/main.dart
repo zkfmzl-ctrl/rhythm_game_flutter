@@ -20,13 +20,15 @@ enum Difficulty { easy, normal, hard, extreme }
 enum Judge { perfect, great, good, miss }
 
 const perspectiveInspectionMode = true;
-const boardTopY = 0.49;
+const boardTopY = 0.54;
 const boardBottomY = 1.0;
-const vanishX = 0.5385;
-const vanishY = 0.466;
+const vanishX = 0.5;
+const vanishY = 0.5165;
 const floorLeftX = 0.04;
 const floorRightX = 0.96;
 const playHudTop = 112.0;
+const playStageWidth = 1448.0;
+const playStageHeight = 1086.0;
 
 class Song {
   const Song({
@@ -1545,23 +1547,24 @@ class PlayScreen extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           const ColoredBox(color: Colors.black),
-          Image.asset('assets/backgrounds/play.png', fit: BoxFit.cover),
           FittedBox(
-            fit: BoxFit.cover,
+            fit: BoxFit.contain,
             alignment: Alignment.center,
             child: SizedBox(
-              width: 1600,
-              height: 900,
+              width: playStageWidth,
+              height: playStageHeight,
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
+                  Image.asset('assets/backgrounds/play2.png',
+                      fit: BoxFit.cover),
                   Positioned.fill(
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTapDown: (details) {
                         final lane = _laneFromPoint(
                           details.localPosition,
-                          const Size(1600, 900),
+                          const Size(playStageWidth, playStageHeight),
                         );
                         if (lane != null) onLane(lane);
                       },
@@ -1722,7 +1725,7 @@ class MovingNotesLayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const stageSize = Size(1600, 900);
+    const stageSize = Size(playStageWidth, playStageHeight);
     return Stack(
       children: game.notes.where((note) => !note.judged).map((note) {
         final p = ((game.elapsed - (note.hitAt - 1350)) / 1350).clamp(
