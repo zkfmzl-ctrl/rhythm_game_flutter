@@ -14,8 +14,7 @@ class CustomScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
+    return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const PageTitle('꾸미기', subtitle: '착용 중 아이템'),
@@ -93,7 +92,6 @@ class CustomScreen extends StatelessWidget {
             ],
           ),
         ],
-      ),
-    );
+      );
   }
 }

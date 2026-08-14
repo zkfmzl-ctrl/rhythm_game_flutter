@@ -231,51 +231,61 @@ class _RhythmGameHomeState extends State<RhythmGameHome> {
   Widget currentScreen() {
     switch (tab) {
       case AppTab.home:
-        return LandscapeHomeScreen(
-          onTab: (next) => setState(() => tab = next),
-          onStart: startGame,
+        return ContainFrame(
+          child: LandscapeHomeScreen(
+            onTab: (next) => setState(() => tab = next),
+            onStart: startGame,
+          ),
         );
       case AppTab.music:
-        return SongSelectScreen(
-          initialSong: selectedSong,
-          initialDifficulty: difficulty,
-          onSelectSong: (song) => setState(() => selectedSong = song),
-          onSelectDifficulty: (next) => setState(() => difficulty = next),
-          onStart: startGame,
+        return ContainFrame(
+          child: SongSelectScreen(
+            initialSong: selectedSong,
+            initialDifficulty: difficulty,
+            onSelectSong: (song) => setState(() => selectedSong = song),
+            onSelectDifficulty: (next) => setState(() => difficulty = next),
+            onStart: startGame,
+          ),
         );
       case AppTab.character:
-        return const CharacterScreen();
+        return const ContainFrame(child: CharacterScreen());
       case AppTab.custom:
-        return CustomScreen(
-          gems: gems,
-          selectedWear: selectedWear,
-          onEquip: (item) {
-            if (item.price <= gems) {
-              setState(() {
-                gems -= item.price;
-                selectedWear = item.name;
-              });
-            }
-          },
+        return ContainFrame(
+          child: CustomScreen(
+            gems: gems,
+            selectedWear: selectedWear,
+            onEquip: (item) {
+              if (item.price <= gems) {
+                setState(() {
+                  gems -= item.price;
+                  selectedWear = item.name;
+                });
+              }
+            },
+          ),
         );
       case AppTab.quest:
-        return const QuestScreen();
+        return const ContainFrame(child: QuestScreen());
       case AppTab.shop:
-        return ShopScreen(
-          coins: coins,
-          gems: gems,
-          onBuy: () => setState(() => coins = math.max(0, coins - 900)),
+        return ContainFrame(
+          child: ShopScreen(
+            coins: coins,
+            gems: gems,
+            onBuy: () => setState(() => coins = math.max(0, coins - 900)),
+          ),
         );
       case AppTab.settings:
-        return SettingsScreen(
-          musicVolume: musicVolume,
-          effectVolume: effectVolume,
-          vibration: vibration,
-          laneSpeed: laneSpeed,
-          onMusic: (value) => setState(() => musicVolume = value),
-          onEffect: (value) => setState(() => effectVolume = value),
-          onVibration: (value) => setState(() => vibration = value),
-          onLaneSpeed: (value) => setState(() => laneSpeed = value),
+        return ContainFrame(
+          child: SettingsScreen(
+            musicVolume: musicVolume,
+            effectVolume: effectVolume,
+            vibration: vibration,
+            laneSpeed: laneSpeed,
+            onMusic: (value) => setState(() => musicVolume = value),
+            onEffect: (value) => setState(() => effectVolume = value),
+            onVibration: (value) => setState(() => vibration = value),
+            onLaneSpeed: (value) => setState(() => laneSpeed = value),
+          ),
         );
     }
   }

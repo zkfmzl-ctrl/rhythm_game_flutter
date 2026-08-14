@@ -24,8 +24,7 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
+    return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const PageTitle('설정', subtitle: '게임 환경 설정'),
@@ -96,8 +95,7 @@ class SettingsScreen extends StatelessWidget {
                 Text('데이터 초기화', style: TextStyle(fontWeight: FontWeight.w900)),
           ),
         ],
-      ),
-    );
+      );
   }
 }
 

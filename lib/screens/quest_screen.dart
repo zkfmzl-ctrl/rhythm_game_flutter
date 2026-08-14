@@ -5,8 +5,7 @@ class QuestScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
+    return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const PageTitle('퀘스트', subtitle: '데일리'),
@@ -51,8 +50,7 @@ class QuestScreen extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
+      );
   }
 }
 

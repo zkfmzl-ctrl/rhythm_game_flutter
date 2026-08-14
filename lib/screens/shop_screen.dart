@@ -31,8 +31,7 @@ class ShopScreen extends StatelessWidget {
       children: [
         Expanded(
           flex: 34,
-          child: SingleChildScrollView(
-            child: Column(
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const PageTitle('상점', subtitle: '추천'),

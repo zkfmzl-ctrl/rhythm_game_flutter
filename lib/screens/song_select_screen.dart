@@ -276,8 +276,7 @@ class _SongDetailPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return PaperPanel(
       padding: const EdgeInsets.all(12),
-      child: SingleChildScrollView(
-        child: Column(
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(

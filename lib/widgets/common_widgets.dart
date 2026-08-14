@@ -1,5 +1,29 @@
 part of '../main.dart';
 
+class ContainFrame extends StatelessWidget {
+  const ContainFrame({required this.child, super.key});
+
+  static const designWidth = 1280.0;
+  static const designHeight = 720.0;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.expand(
+      child: FittedBox(
+        fit: BoxFit.contain,
+        alignment: Alignment.center,
+        child: SizedBox(
+          width: designWidth,
+          height: designHeight,
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
 class SketchBackground extends StatelessWidget {
   const SketchBackground({required this.child, super.key});
   final Widget child;
