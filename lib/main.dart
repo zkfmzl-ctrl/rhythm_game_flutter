@@ -19,11 +19,21 @@ enum Difficulty { easy, normal, hard, extreme }
 
 enum Judge { perfect, great, good, miss }
 
+const perspectiveInspectionMode = true;
+const boardTopY = 0.49;
+const boardBottomY = 1.0;
+const vanishX = 0.5385;
+const vanishY = 0.466;
+const floorLeftX = 0.04;
+const floorRightX = 0.96;
+const playHudTop = 112.0;
+
 class Song {
   const Song({
     required this.id,
     required this.title,
     required this.subtitle,
+    required this.thumbnailAsset,
     required this.bpm,
     required this.isLocked,
     required this.difficulties,
@@ -32,6 +42,7 @@ class Song {
   final int id;
   final String title;
   final String subtitle;
+  final String thumbnailAsset;
   final int bpm;
   final bool isLocked;
   final Map<Difficulty, DifficultyInfo> difficulties;
@@ -99,7 +110,7 @@ class DistortedRhythmApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: '??????????',
+      title: '왜곡된 리듬',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff222222)),
         useMaterial3: true,
@@ -125,7 +136,7 @@ class _RhythmGameHomeState extends State<RhythmGameHome> {
   Timer? ticker;
   int coins = 12450;
   int gems = 2680;
-  String selectedWear = '?????????????';
+  String selectedWear = '기본 스크리블';
   double musicVolume = 80;
   double effectVolume = 70;
   double laneSpeed = 1.0;
@@ -466,17 +477,17 @@ class CurrencyBar extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            '??${coins.toString()}',
-            style: const TextStyle(fontWeight: FontWeight.w900),
-          ),
+          const Icon(Icons.toll, size: 18),
+          const SizedBox(width: 3),
+          Text(coins.toString(),
+              style: const TextStyle(fontWeight: FontWeight.w900)),
           const SizedBox(width: 8),
           const MiniBox('+'),
           const SizedBox(width: 8),
-          Text(
-            '??${gems.toString()}',
-            style: const TextStyle(fontWeight: FontWeight.w900),
-          ),
+          const Icon(Icons.diamond, size: 18),
+          const SizedBox(width: 3),
+          Text(gems.toString(),
+              style: const TextStyle(fontWeight: FontWeight.w900)),
           const SizedBox(width: 8),
           const MiniBox('+'),
         ],
@@ -532,24 +543,23 @@ class LandscapeHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final actions = [
-      _HomeAction('Start Game', 'Enter play mode', Icons.play_arrow, onStart),
-      _HomeAction('Song Select', 'Choose a song', Icons.music_note,
-          () => onTab(AppTab.music)),
-      _HomeAction('Character', 'View character', Icons.person_pin,
-          () => onTab(AppTab.character)),
-      _HomeAction('Custom', 'Change outfit', Icons.checkroom,
-          () => onTab(AppTab.custom)),
-      _HomeAction('Quest', 'Claim rewards', Icons.fact_check,
-          () => onTab(AppTab.quest)),
+      _HomeAction('게임 시작', '리듬의 세계로 들어가기', Icons.play_arrow, onStart),
       _HomeAction(
-          'Shop', 'Buy items', Icons.shopping_cart, () => onTab(AppTab.shop)),
-      _HomeAction('Settings', 'Adjust game options', Icons.settings,
-          () => onTab(AppTab.settings)),
+          '곡 선택', '곡을 선택하고 플레이', Icons.music_note, () => onTab(AppTab.music)),
+      _HomeAction('캐릭터', '캐릭터 확인 및 변경', Icons.person_pin,
+          () => onTab(AppTab.character)),
+      _HomeAction(
+          '꾸미기', '의상과 이펙트 변경', Icons.checkroom, () => onTab(AppTab.custom)),
+      _HomeAction(
+          '퀘스트', '임무를 완료하고 보상 받기', Icons.fact_check, () => onTab(AppTab.quest)),
+      _HomeAction(
+          '상점', '아이템과 패키지 구매', Icons.shopping_cart, () => onTab(AppTab.shop)),
+      _HomeAction(
+          '설정', '게임 환경 설정', Icons.settings, () => onTab(AppTab.settings)),
     ];
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final buttonRatio = constraints.maxWidth > 1300 ? 4.3 : 3.55;
         return Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -558,8 +568,7 @@ class LandscapeHomeScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const PageTitle('Distorted Rhythm',
-                      subtitle: 'Sketch rhythm hallway'),
+                  const PageTitle('왜곡된 리듬', subtitle: '리듬으로 깨어난 나'),
                   Expanded(
                     child: PaperPanel(
                       padding: EdgeInsets.zero,
@@ -576,7 +585,8 @@ class LandscapeHomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   const PaperPanel(
-                    child: Text('Notice\nNew songs and missions are available.',
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    child: Text('공지\n새로운 곡과 임무를 확인하세요.',
                         style: TextStyle(fontWeight: FontWeight.w800)),
                   ),
                 ],
@@ -585,14 +595,16 @@ class LandscapeHomeScreen extends StatelessWidget {
             const SizedBox(width: 16),
             Expanded(
               flex: 58,
-              child: GridView.count(
-                crossAxisCount: 2,
-                childAspectRatio: buttonRatio,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                children: actions
-                    .map((item) => _LandscapeActionButton(item: item))
-                    .toList(),
+              child: GridView.builder(
+                itemCount: actions.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisExtent: 92,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                ),
+                itemBuilder: (context, index) =>
+                    _LandscapeActionButton(item: actions[index]),
               ),
             ),
           ],
@@ -617,9 +629,12 @@ class _LandscapeActionButton extends StatelessWidget {
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(item.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                         fontSize: 18, fontWeight: FontWeight.w900)),
                 Text(item.subtitle,
@@ -742,8 +757,6 @@ class _SongSelectScreenState extends State<SongSelectScreen> {
                                     selected: song.id == _selected.id,
                                     frameAsset:
                                         'assets/buttons/box_${(index + 1).toString().padLeft(2, '0')}.png',
-                                    noteAsset:
-                                        'assets/notes/note_${(index + 1).toString().padLeft(2, '0')}.png',
                                     onTap: () => _selectSong(song),
                                   ),
                                 );
@@ -780,14 +793,12 @@ class _SongSelectTile extends StatelessWidget {
     required this.song,
     required this.selected,
     required this.frameAsset,
-    required this.noteAsset,
     required this.onTap,
   });
 
   final Song song;
   final bool selected;
   final String frameAsset;
-  final String noteAsset;
   final VoidCallback onTap;
 
   @override
@@ -797,7 +808,7 @@ class _SongSelectTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 72,
+        height: 92,
         decoration: BoxDecoration(
           border: selected
               ? Border.all(color: Colors.black, width: 3)
@@ -808,34 +819,75 @@ class _SongSelectTile extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             Image.asset(frameAsset, fit: BoxFit.fill),
-            Container(
-                color: Colors.white
-                    .withValues(alpha: song.isLocked ? 0.62 : 0.34)),
+            ColoredBox(
+              color: song.isLocked
+                  ? const Color(0xcce8e4d8)
+                  : const Color(0xdffff8e7),
+            ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
               child: Row(
                 children: [
-                  Image.asset(noteAsset,
-                      width: 38, height: 38, fit: BoxFit.contain),
-                  const SizedBox(width: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(2),
+                    child: ColorFiltered(
+                      colorFilter: song.isLocked
+                          ? const ColorFilter.mode(
+                              Color(0x88000000),
+                              BlendMode.srcATop,
+                            )
+                          : const ColorFilter.mode(
+                              Colors.transparent,
+                              BlendMode.dst,
+                            ),
+                      child: Image.asset(song.thumbnailAsset,
+                          width: 58, height: 58, fit: BoxFit.cover),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                            '${song.id.toString().padLeft(2, '0')}. ${song.title}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                fontSize: 13, fontWeight: FontWeight.w900)),
-                        Text(
-                            '${song.subtitle} - BPM ${song.bpm} - Lv.${info.level}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                fontSize: 10, fontWeight: FontWeight.w700)),
-                      ],
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: const Color(0xfffff8e7),
+                        border: Border.all(
+                          color: Colors.black.withValues(alpha: 0.55),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 5),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                                '${song.id.toString().padLeft(2, '0')}. ${song.title}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xff050505),
+                                    fontWeight: FontWeight.w900,
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.white,
+                                        blurRadius: 2,
+                                        offset: Offset(0, 1),
+                                      ),
+                                    ])),
+                            const SizedBox(height: 3),
+                            Text(
+                                '${song.subtitle} - BPM ${song.bpm} - Lv.${info.level}',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xff252525),
+                                    fontWeight: FontWeight.w700)),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                   if (song.isLocked)
@@ -873,82 +925,85 @@ class _SongDetailPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return PaperPanel(
       padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Image.asset(
-                  'assets/notes/note_${song.id.toString().padLeft(2, '0')}.png',
-                  width: 76,
-                  height: 76,
-                  fit: BoxFit.contain),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(song.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.w900)),
-                    Text(song.subtitle,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w800)),
-                    const SizedBox(height: 4),
-                    Text('BPM ${song.bpm}',
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w900)),
-                  ],
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(2),
+                  child: Image.asset(song.thumbnailAsset,
+                      width: 76, height: 76, fit: BoxFit.cover),
                 ),
-              ),
-              if (song.isLocked) const Icon(Icons.lock, size: 32),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 7,
-            runSpacing: 7,
-            children: Difficulty.values.map((item) {
-              final selected = item == difficulty;
-              final itemInfo = song.difficulties[item]!;
-              final index = Difficulty.values.indexOf(item) + 6;
-              return _DifficultyButton(
-                label: diffText(item),
-                subLabel: 'Lv.${itemInfo.level}  ${stars(itemInfo.starRating)}',
-                asset:
-                    'assets/buttons/box_${index.toString().padLeft(2, '0')}.png',
-                selected: selected,
-                onTap: () => onDifficulty(item),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                  child: LabeledValue(
-                      '\uCD5C\uACE0\uC810\uC218',
-                      info.bestScore == null
-                          ? '-'
-                          : formatScore(info.bestScore!))),
-              const SizedBox(width: 8),
-              Expanded(
-                  child: LabeledValue('\uB7AD\uD06C', info.bestRank ?? '-')),
-            ],
-          ),
-          const SizedBox(height: 8),
-          PaperPanel(
-            padding: const EdgeInsets.all(9),
-            child: Text(
-                'Difficulty ${diffText(difficulty)} - Level ${info.level} - Stars ${info.starRating.toStringAsFixed(1)}',
-                style: const TextStyle(fontWeight: FontWeight.w900)),
-          ),
-          const Spacer(),
-          _StartButton(enabled: !song.isLocked, onTap: onStart),
-        ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(song.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.w900)),
+                      Text(song.subtitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.w800)),
+                      const SizedBox(height: 4),
+                      Text('BPM ${song.bpm}',
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w900)),
+                    ],
+                  ),
+                ),
+                if (song.isLocked) const Icon(Icons.lock, size: 32),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 7,
+              runSpacing: 7,
+              children: Difficulty.values.map((item) {
+                final selected = item == difficulty;
+                final itemInfo = song.difficulties[item]!;
+                final index = Difficulty.values.indexOf(item) + 6;
+                return _DifficultyButton(
+                  label: diffText(item),
+                  subLabel:
+                      'Lv.${itemInfo.level}  ${stars(itemInfo.starRating)}',
+                  asset:
+                      'assets/buttons/box_${index.toString().padLeft(2, '0')}.png',
+                  selected: selected,
+                  onTap: () => onDifficulty(item),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                    child: LabeledValue(
+                        '\uCD5C\uACE0\uC810\uC218',
+                        info.bestScore == null
+                            ? '-'
+                            : formatScore(info.bestScore!))),
+                const SizedBox(width: 8),
+                Expanded(
+                    child: LabeledValue('\uB7AD\uD06C', info.bestRank ?? '-')),
+              ],
+            ),
+            const SizedBox(height: 8),
+            PaperPanel(
+              padding: const EdgeInsets.all(9),
+              child: Text(
+                  '난이도 ${diffText(difficulty)} · 레벨 ${info.level} · 별점 ${info.starRating.toStringAsFixed(1)}',
+                  style: const TextStyle(fontWeight: FontWeight.w900)),
+            ),
+            const SizedBox(height: 10),
+            _StartButton(enabled: !song.isLocked, onTap: onStart),
+          ],
+        ),
       ),
     );
   }
@@ -1068,46 +1123,70 @@ class CharacterScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final characters = ['노아', '리마', '아이'].asMap().entries.toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const PageTitle('Character', subtitle: 'Select a performer'),
-        ...['Noah', 'Rima', 'Ai'].asMap().entries.map(
-              (entry) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: PaperPanel(
-                  child: Row(
-                    children: [
-                      Image.asset(
-                          entry.key == 0
-                              ? 'assets/sketch/character-card.png'
-                              : 'assets/sketch/song-thumb-2.png',
-                          width: 86,
-                          height: 104,
-                          fit: BoxFit.cover),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(entry.value,
-                                style: const TextStyle(
-                                    fontSize: 24, fontWeight: FontWeight.w900)),
-                            Text(entry.key == 0 ? 'Selected' : 'Locked',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w700)),
-                            Text(
-                                'Rhythm ${70 + entry.key * 10} - Recovery ${50 + entry.key * 8}',
-                                style: const TextStyle(fontSize: 12)),
-                          ],
+        const PageTitle('캐릭터', subtitle: '리듬 공명'),
+        Expanded(
+          child: ListView.builder(
+            itemCount: characters.length,
+            itemBuilder: (context, index) {
+              final entry = characters[index];
+              return Padding(
+                padding: EdgeInsets.only(
+                    bottom: index == characters.length - 1 ? 0 : 12),
+                child: SizedBox(
+                  height: 140,
+                  child: PaperPanel(
+                    child: Row(
+                      children: [
+                        Image.asset(
+                            entry.key == 0
+                                ? 'assets/sketch/character-card.png'
+                                : 'assets/sketch/song-thumb-2.png',
+                            width: 86,
+                            height: 104,
+                            fit: BoxFit.cover),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(entry.value,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w900)),
+                              Text(entry.key == 0 ? '선택 중' : '잠김',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w700)),
+                              Text(
+                                  '체력 ${80 + entry.key * 8} · 리듬 감응력 ${70 + entry.key * 10}\n이동 속도 ${60 + entry.key * 6} · 집중력 ${50 + entry.key * 8}',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 12)),
+                              const Text('고유 능력: 리듬 공명',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800)),
+                            ],
+                          ),
                         ),
-                      ),
-                      if (entry.key > 0) const Icon(Icons.lock),
-                    ],
+                        if (entry.key > 0) const Icon(Icons.lock),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
+          ),
+        ),
       ],
     );
   }
@@ -1129,7 +1208,7 @@ class CustomScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const PageTitle('Custom', subtitle: 'Change outfit and effects'),
+        const PageTitle('꾸미기', subtitle: '착용 중 아이템'),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1141,10 +1220,10 @@ class CustomScreen extends StatelessWidget {
                     Image.asset('assets/sketch/wardrobe-preview.png',
                         height: 270, fit: BoxFit.cover),
                     const SizedBox(height: 8),
-                    const Text('Current Outfit',
+                    const Text('착용 중 아이템',
                         style: TextStyle(fontWeight: FontWeight.w900)),
                     Text(
-                        'Wear: $selectedWear\nTop: Basic shirt\nBottom: Black pants\nShoes: Basic shoes'),
+                        '헤어: $selectedWear\n장신구: 기본 장신구\n상의: 기본 상의\n하의: 기본 하의\n신발: 기본 신발\n얼굴: 기본 얼굴'),
                   ],
                 ),
               ),
@@ -1171,9 +1250,9 @@ class CustomScreen extends StatelessWidget {
                                         fontSize: 12,
                                         fontWeight: FontWeight.w900)),
                                 Text(selectedWear == item.name
-                                    ? 'Equipped'
+                                    ? '장착 해제'
                                     : item.owned
-                                        ? 'Owned'
+                                        ? '장착하기'
                                         : '${item.price}'),
                               ],
                             ),
@@ -1197,7 +1276,19 @@ class QuestScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const PageTitle('Quest', subtitle: 'Complete missions'),
+        const PageTitle('퀘스트', subtitle: '데일리'),
+        const Row(
+          children: [
+            _QuestFilter('데일리'),
+            SizedBox(width: 8),
+            _QuestFilter('위클리'),
+            SizedBox(width: 8),
+            _QuestFilter('업적'),
+            SizedBox(width: 8),
+            _QuestFilter('모두 받기'),
+          ],
+        ),
+        const SizedBox(height: 12),
         ...quests.map((quest) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: PaperPanel(
@@ -1212,12 +1303,25 @@ class QuestScreen extends StatelessWidget {
                                 const TextStyle(fontWeight: FontWeight.w800))),
                     ElevatedButton(
                         onPressed: quest.done ? () {} : null,
-                        child: Text(quest.done ? 'Claim' : quest.reward)),
+                        child: Text(quest.done ? '보상 받기' : '바로 가기')),
                   ],
                 ),
               ),
             )),
       ],
+    );
+  }
+}
+
+class _QuestFilter extends StatelessWidget {
+  const _QuestFilter(this.label);
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return PaperPanel(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      child: Text(label, style: const TextStyle(fontWeight: FontWeight.w900)),
     );
   }
 }
@@ -1235,18 +1339,11 @@ class ShopScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const packs = [
-      'Sketch Piece',
-      'Aura Skin',
-      'Rhythm Booster',
-      'S+ Pass',
-      'Vibe Skin',
-      'Memory Unlock'
-    ];
+    const packs = ['추천', '장비/효과', '묶음 상품', '재화', '꾸미기'];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const PageTitle('Shop', subtitle: 'Buy items and packs'),
+        const PageTitle('상점', subtitle: '추천'),
         PaperPanel(
           child: Column(
             children: [
@@ -1255,7 +1352,7 @@ class ShopScreen extends StatelessWidget {
                   width: double.infinity,
                   fit: BoxFit.cover,
                   alignment: Alignment.topCenter),
-              Text('Currency: $coins - $gems',
+              Text('재화: $coins / $gems',
                   style: const TextStyle(fontWeight: FontWeight.w900)),
             ],
           ),
@@ -1282,7 +1379,7 @@ class ShopScreen extends StatelessWidget {
                               ? '${(entry.key + 1) * 300}'
                               : '${(entry.key + 1) * 200}'),
                           ElevatedButton(
-                              onPressed: onBuy, child: const Text('Buy')),
+                              onPressed: onBuy, child: const Text('구매')),
                         ],
                       ),
                     ),
@@ -1320,18 +1417,17 @@ class SettingsScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const PageTitle('Settings', subtitle: 'Game options'),
+        const PageTitle('설정', subtitle: '게임 환경 설정'),
+        SettingSlider(label: '음악 볼륨', value: musicVolume, onChanged: onMusic),
         SettingSlider(
-            label: 'Music Volume', value: musicVolume, onChanged: onMusic),
-        SettingSlider(
-          label: 'Effect Volume',
+          label: '효과음 볼륨',
           value: effectVolume,
           onChanged: onEffect,
         ),
         PaperPanel(
           child: SwitchListTile(
             title: const Text(
-              'Vibration',
+              '진동',
               style: TextStyle(fontWeight: FontWeight.w900),
             ),
             value: vibration,
@@ -1344,7 +1440,7 @@ class SettingsScreen extends StatelessWidget {
             children: [
               const Expanded(
                 child: Text(
-                  '???? ????',
+                  '노트 속도',
                   style: TextStyle(fontWeight: FontWeight.w900),
                 ),
               ),
@@ -1362,6 +1458,19 @@ class SettingsScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
+        const SizedBox(height: 12),
+        const PaperPanel(
+          child: Text('판정 보조', style: TextStyle(fontWeight: FontWeight.w900)),
+        ),
+        const SizedBox(height: 12),
+        const PaperPanel(
+          child:
+              Text('그래픽/배경 효과', style: TextStyle(fontWeight: FontWeight.w900)),
+        ),
+        const SizedBox(height: 12),
+        const PaperPanel(
+          child: Text('데이터 초기화', style: TextStyle(fontWeight: FontWeight.w900)),
         ),
       ],
     );
@@ -1431,331 +1540,121 @@ class PlayScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final rank = rankFrom(game.score, game.notes.length * 100);
     return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            SketchBackground(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 190,
-                      child: _PlayLeftPanel(
-                        song: song,
-                        difficulty: difficulty,
-                        game: game,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          _ProgressBar(game: game),
-                          const SizedBox(height: 6),
-                          Expanded(
-                            child: PerspectiveLaneStage(
-                              game: game,
-                              onLane: onLane,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    SizedBox(
-                      width: 150,
-                      child: _PlayRightPanel(
-                        game: game,
-                        rank: rank,
-                        onExit: onExit,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            if (game.finished)
-              Center(
-                child: PaperPanel(
-                  padding: const EdgeInsets.all(18),
-                  child: SizedBox(
-                    width: 360,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          rank,
-                          style: const TextStyle(
-                            fontSize: 64,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        Text(
-                          '${song.title} CLEAR',
-                          style: const TextStyle(fontWeight: FontWeight.w900),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          '???? ${game.score}\n???? ?????${game.maxCombo}\nPERFECT ${game.counts[Judge.perfect]} ??MISS ${game.counts[Judge.miss]}',
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: onReplay,
-                                child: const Text('????????'),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: onExit,
-                                child: const Text('??????????'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PlayLeftPanel extends StatelessWidget {
-  const _PlayLeftPanel({
-    required this.song,
-    required this.difficulty,
-    required this.game,
-  });
-
-  final Song song;
-  final Difficulty difficulty;
-  final GameState game;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned(
-          left: 0,
-          top: 0,
-          right: 0,
-          child: PaperPanel(
-            padding: const EdgeInsets.all(8),
-            child: Row(
-              children: [
-                Image.asset(
-                  'assets/sketch/song-thumb-2.png',
-                  width: 58,
-                  height: 58,
-                  fit: BoxFit.cover,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        song.title,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          _DarkTag(diffText(difficulty)),
-                          const SizedBox(width: 8),
-                          Text(
-                            'BPM  ${song.bpm}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        Positioned(
-          left: 8,
-          top: 84,
-          bottom: 72,
-          width: 150,
-          child: Image.asset(
-            'assets/sketch/home-character.png',
+      backgroundColor: Colors.black,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          const ColoredBox(color: Colors.black),
+          Image.asset('assets/backgrounds/play.png', fit: BoxFit.cover),
+          FittedBox(
             fit: BoxFit.cover,
-            alignment: Alignment.topCenter,
-          ),
-        ),
-        Positioned(
-          left: 0,
-          bottom: 0,
-          width: 150,
-          child: PaperPanel(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: Column(
-              children: [
-                _JudgeCount(
-                  symbol: 'O',
-                  label: 'PERFECT',
-                  count: game.counts[Judge.perfect]!,
-                ),
-                _JudgeCount(
-                  symbol: 'A',
-                  label: 'GREAT',
-                  count: game.counts[Judge.great]!,
-                ),
-                _JudgeCount(
-                  symbol: 'D',
-                  label: 'GOOD',
-                  count: game.counts[Judge.good]!,
-                ),
-                _JudgeCount(
-                  symbol: 'X',
-                  label: 'MISS',
-                  count: game.counts[Judge.miss]!,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _PlayRightPanel extends StatelessWidget {
-  const _PlayRightPanel({
-    required this.game,
-    required this.rank,
-    required this.onExit,
-  });
-
-  final GameState game;
-  final String rank;
-  final VoidCallback onExit;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: 1600,
+              height: 900,
+              child: Stack(
+                clipBehavior: Clip.none,
                 children: [
-                  Text(
-                    '${game.score}',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      height: 0.95,
-                      fontWeight: FontWeight.w900,
+                  Positioned.fill(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTapDown: (details) {
+                        final lane = _laneFromPoint(
+                          details.localPosition,
+                          const Size(1600, 900),
+                        );
+                        if (lane != null) onLane(lane);
+                      },
+                      child: const NoteBoardLayer(),
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${game.combo}',
-                    style: const TextStyle(
-                      fontSize: 26,
-                      height: 0.9,
-                      fontWeight: FontWeight.w900,
-                    ),
+                  MovingNotesLayer(game: game),
+                  JudgementLayer(game: game),
+                  const Positioned(
+                    left: 118,
+                    top: 180,
+                    width: 255,
+                    height: 535,
+                    child: _PlayCharacterLayer(),
                   ),
-                  Text(
-                    'COMBO',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.black.withValues(alpha: 0.72),
-                      fontWeight: FontWeight.w800,
-                    ),
+                  Positioned(
+                    left: 34,
+                    top: playHudTop,
+                    width: 470,
+                    child: _SongHud(song: song, difficulty: difficulty),
                   ),
+                  Positioned(
+                    left: 740,
+                    top: playHudTop + 8,
+                    width: 420,
+                    child: _ProgressBar(game: game),
+                  ),
+                  Positioned(
+                    right: 50,
+                    top: playHudTop,
+                    width: 260,
+                    child: _ScoreHud(game: game, rank: rank, onExit: onExit),
+                  ),
+                  Positioned(
+                    left: 32,
+                    bottom: 26,
+                    width: 240,
+                    child: _JudgeHud(game: game),
+                  ),
+                  if (game.finished)
+                    Center(
+                      child: PaperPanel(
+                        padding: const EdgeInsets.all(18),
+                        child: SizedBox(
+                          width: 360,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                rank,
+                                style: const TextStyle(
+                                  fontSize: 64,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              Text(
+                                '${song.title} 클리어',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w900),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                '점수 ${game.score}\n최대 콤보 ${game.maxCombo}\nPERFECT ${game.counts[Judge.perfect]} · MISS ${game.counts[Judge.miss]}',
+                              ),
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      onPressed: onReplay,
+                                      child: const Text('다시하기'),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      onPressed: onExit,
+                                      child: const Text('곡 선택으로'),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
-            InkWell(
-              onTap: onExit,
-              child: PaperPanel(
-                padding: const EdgeInsets.all(9),
-                child: Icon(
-                  Icons.pause,
-                  size: 30,
-                  color: Colors.black.withValues(alpha: 0.92),
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        PaperPanel(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                '???? ????',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900),
-              ),
-              const SizedBox(height: 6),
-              Center(
-                child: Text(
-                  rank,
-                  style: const TextStyle(
-                    fontSize: 48,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 4),
-              const _RankGauge(percent: 0.84),
-              const SizedBox(height: 2),
-              const Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  '84%',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900),
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                '???? ????',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900),
-              ),
-              const SizedBox(height: 2),
-              Row(
-                children: const [
-                  Text(
-                    'S+',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    '100%',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900),
-                  ),
-                ],
-              ),
-            ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -1789,109 +1688,274 @@ class _ProgressBar extends StatelessWidget {
   }
 }
 
-class PerspectiveLaneStage extends StatelessWidget {
-  const PerspectiveLaneStage({
-    required this.game,
-    required this.onLane,
-    super.key,
-  });
-  final GameState game;
-  final ValueChanged<int> onLane;
+class NoteBoardLayer extends StatelessWidget {
+  const NoteBoardLayer({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTapDown: (details) {
-            final lane = _laneFromPoint(
-              details.localPosition,
-              Size(constraints.maxWidth, constraints.maxHeight),
-            );
-            if (lane != null) onLane(lane);
-          },
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: CustomPaint(painter: _PerspectiveLanePainter()),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Positioned.fill(child: CustomPaint(painter: _PerspectiveLanePainter())),
+        Positioned(
+          left: 485,
+          right: 105,
+          bottom: 18,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(5, (lane) {
+              return CustomPaint(
+                size: const Size(86, 48),
+                painter: _HitPadPainter(active: lane == 1 || lane == 2),
+              );
+            }),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class MovingNotesLayer extends StatelessWidget {
+  const MovingNotesLayer({required this.game, super.key});
+  final GameState game;
+
+  @override
+  Widget build(BuildContext context) {
+    const stageSize = Size(1600, 900);
+    return Stack(
+      children: game.notes.where((note) => !note.judged).map((note) {
+        final p = ((game.elapsed - (note.hitAt - 1350)) / 1350).clamp(
+          -0.25,
+          1.1,
+        );
+        if (p < -0.1 || p > 1.05) return const SizedBox.shrink();
+        final point = _lanePoint(stageSize, note.lane, p);
+        final scale = 0.45 + p * 0.9;
+        return Positioned(
+          left: point.dx - 18 * scale,
+          top: point.dy - (note.long ? 60 : 18) * scale,
+          child: _PlayNoteShape(lane: note.lane, long: note.long, scale: scale),
+        );
+      }).toList(),
+    );
+  }
+}
+
+class JudgementLayer extends StatelessWidget {
+  const JudgementLayer({required this.game, super.key});
+  final GameState game;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: 630,
+      top: 520,
+      width: 460,
+      child: IgnorePointer(
+        child: Column(
+          children: [
+            Text(
+              judgeText(game.lastJudge),
+              style: TextStyle(
+                fontSize: 58,
+                height: 0.95,
+                color: Colors.white.withValues(alpha: 0.78),
+                fontWeight: FontWeight.w900,
               ),
-              ...game.notes.where((note) => !note.judged).map((note) {
-                final p = ((game.elapsed - (note.hitAt - 1350)) / 1350).clamp(
-                  -0.25,
-                  1.1,
-                );
-                if (p < -0.1 || p > 1.05) return const SizedBox.shrink();
-                final point = _lanePoint(
-                  Size(constraints.maxWidth, constraints.maxHeight),
-                  note.lane,
-                  p,
-                );
-                final scale = 0.45 + p * 0.9;
-                return Positioned(
-                  left: point.dx - 18 * scale,
-                  top: point.dy - (note.long ? 60 : 18) * scale,
-                  child: _PlayNoteShape(
-                    lane: note.lane,
-                    long: note.long,
-                    scale: scale,
-                  ),
-                );
-              }),
-              Positioned(
-                left: constraints.maxWidth * 0.33,
-                right: constraints.maxWidth * 0.24,
-                top: constraints.maxHeight * 0.55,
-                child: IgnorePointer(
-                  child: Column(
-                    children: [
-                      Text(
-                        judgeText(game.lastJudge),
-                        style: TextStyle(
-                          fontSize: 52,
+            ),
+            Text(
+              '${math.max(game.combo, 47)} COMBO',
+              style: TextStyle(
+                fontSize: 30,
+                color: Colors.white.withValues(alpha: 0.74),
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PlayCharacterLayer extends StatelessWidget {
+  const _PlayCharacterLayer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      'assets/character/character_01.png',
+      fit: BoxFit.contain,
+      alignment: Alignment.bottomCenter,
+    );
+  }
+}
+
+class _SongHud extends StatelessWidget {
+  const _SongHud({required this.song, required this.difficulty});
+  final Song song;
+  final Difficulty difficulty;
+
+  @override
+  Widget build(BuildContext context) {
+    return PaperPanel(
+      padding: const EdgeInsets.all(8),
+      child: Row(
+        children: [
+          Image.asset(song.thumbnailAsset,
+              width: 74, height: 74, fit: BoxFit.cover),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  song.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      fontSize: 24, fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    _DarkTag(diffText(difficulty)),
+                    const SizedBox(width: 14),
+                    Text(
+                      'BPM  ${song.bpm}',
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w800),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ScoreHud extends StatelessWidget {
+  const _ScoreHud(
+      {required this.game, required this.rank, required this.onExit});
+  final GameState game;
+  final String rank;
+  final VoidCallback onExit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${game.score}',
+                      style: const TextStyle(
+                          fontSize: 40,
                           height: 0.95,
-                          color: Colors.white.withValues(alpha: 0.76),
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      Text(
-                        '${math.max(game.combo, 47)} COMBO',
-                        style: TextStyle(
-                          fontSize: 28,
-                          color: Colors.white.withValues(alpha: 0.72),
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ],
+                          fontWeight: FontWeight.w900)),
+                  const SizedBox(height: 6),
+                  Text('${game.combo}',
+                      style: const TextStyle(
+                          fontSize: 44,
+                          height: 0.9,
+                          fontWeight: FontWeight.w900)),
+                  Text(
+                    'COMBO',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.black.withValues(alpha: 0.72),
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
+                ],
+              ),
+            ),
+            InkWell(
+              onTap: onExit,
+              child: PaperPanel(
+                padding: const EdgeInsets.all(13),
+                child: Icon(
+                  Icons.pause,
+                  size: 42,
+                  color: Colors.black.withValues(alpha: 0.92),
                 ),
               ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 18,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(5, (lane) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
-                      child: InkWell(
-                        onTap: () => onLane(lane),
-                        child: CustomPaint(
-                          size: const Size(78, 44),
-                          painter: _HitPadPainter(
-                            active: lane == 1 || lane == 2,
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 28),
+        PaperPanel(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('현재 등급',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+              Center(
+                child: Text(rank,
+                    style: const TextStyle(
+                        fontSize: 74, fontWeight: FontWeight.w900)),
+              ),
+              const _RankGauge(percent: 0.84),
+              const Align(
+                alignment: Alignment.centerRight,
+                child: Text('84%',
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+              ),
+              const SizedBox(height: 10),
+              const Text('다음 등급',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+              const Row(
+                children: [
+                  Text('S+',
+                      style:
+                          TextStyle(fontSize: 34, fontWeight: FontWeight.w900)),
+                  SizedBox(width: 18),
+                  Text('100%',
+                      style:
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
+                ],
               ),
             ],
           ),
-        );
-      },
+        ),
+      ],
+    );
+  }
+}
+
+class _JudgeHud extends StatelessWidget {
+  const _JudgeHud({required this.game});
+  final GameState game;
+
+  @override
+  Widget build(BuildContext context) {
+    return PaperPanel(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: Column(
+        children: [
+          _JudgeCount(
+              symbol: 'O',
+              label: 'PERFECT',
+              count: game.counts[Judge.perfect]!),
+          _JudgeCount(
+              symbol: 'A', label: 'GREAT', count: game.counts[Judge.great]!),
+          _JudgeCount(
+              symbol: 'D', label: 'GOOD', count: game.counts[Judge.good]!),
+          _JudgeCount(
+              symbol: 'X', label: 'MISS', count: game.counts[Judge.miss]!),
+        ],
+      ),
     );
   }
 }
@@ -1990,42 +2054,52 @@ class _PlayNoteShape extends StatelessWidget {
 }
 
 int? _laneFromPoint(Offset point, Size size) {
-  if (point.dy < size.height * 0.2 || point.dy > size.height * 0.96)
+  final normalizedY = point.dy / size.height;
+  if (normalizedY < boardTopY || normalizedY > boardBottomY) {
     return null;
-  final bottomLeft = size.width * 0.12;
-  final bottomRight = size.width * 0.9;
-  final topLeft = size.width * 0.36;
-  final topRight = size.width * 0.66;
-  final t = (point.dy / size.height).clamp(0.0, 1.0);
-  final left = topLeft + (bottomLeft - topLeft) * t;
-  final right = topRight + (bottomRight - topRight) * t;
-  final normalized = (point.dx - left) / (right - left);
+  }
+  final progress =
+      ((normalizedY - boardTopY) / (boardBottomY - boardTopY)).clamp(0.0, 1.0);
+  final normalizedX = point.dx / size.width;
+  final left = _perspectiveXAtProgress(floorLeftX, progress);
+  final right = _perspectiveXAtProgress(floorRightX, progress);
+  final normalized = (normalizedX - left) / (right - left);
   if (normalized < 0 || normalized > 1) return null;
   return (normalized * 5).floor().clamp(0, 4);
 }
 
 Offset _lanePoint(Size size, int lane, double progress) {
-  final topY = size.height * 0.04;
-  final bottomY = size.height * 0.9;
-  final y = topY + (bottomY - topY) * progress;
-  final topLeft = size.width * 0.39;
-  final topRight = size.width * 0.64;
-  final bottomLeft = size.width * 0.12;
-  final bottomRight = size.width * 0.9;
-  final left = topLeft + (bottomLeft - topLeft) * progress;
-  final right = topRight + (bottomRight - topRight) * progress;
+  final y = size.height * _boardYAtProgress(progress);
+  final left = _perspectiveXAtProgress(floorLeftX, progress);
+  final right = _perspectiveXAtProgress(floorRightX, progress);
   final laneWidth = (right - left) / 5;
-  return Offset(left + laneWidth * (lane + 0.5), y);
+  return Offset(size.width * (left + laneWidth * (lane + 0.5)), y);
+}
+
+double _boardYAtProgress(double progress) {
+  return boardTopY + (boardBottomY - boardTopY) * progress;
+}
+
+double _perspectiveXAtProgress(double floorX, double progress) {
+  final topX = _perspectiveXAtY(floorX, boardTopY);
+  return topX + (floorX - topX) * progress;
+}
+
+double _perspectiveXAtY(double floorX, double y) {
+  final t = (y - vanishY) / (boardBottomY - vanishY);
+  return vanishX + (floorX - vanishX) * t;
 }
 
 class _PerspectiveLanePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
+    final topLeft = _perspectiveXAtY(floorLeftX, boardTopY);
+    final topRight = _perspectiveXAtY(floorRightX, boardTopY);
     final board = Path()
-      ..moveTo(size.width * 0.35, size.height * 0.02)
-      ..lineTo(size.width * 0.68, size.height * 0.02)
-      ..lineTo(size.width * 0.96, size.height)
-      ..lineTo(size.width * 0.04, size.height)
+      ..moveTo(size.width * topLeft, size.height * boardTopY)
+      ..lineTo(size.width * topRight, size.height * boardTopY)
+      ..lineTo(size.width * floorRightX, size.height * boardBottomY)
+      ..lineTo(size.width * floorLeftX, size.height * boardBottomY)
       ..close();
     canvas.drawPath(
       board,
@@ -2044,8 +2118,14 @@ class _PerspectiveLanePainter extends CustomPainter {
       ..strokeWidth = 2;
     for (var i = 0; i <= 5; i += 1) {
       final p = i / 5;
-      final top = Offset(size.width * (0.35 + 0.33 * p), size.height * 0.02);
-      final bottom = Offset(size.width * (0.04 + 0.92 * p), size.height);
+      final top = Offset(
+        size.width * (topLeft + (topRight - topLeft) * p),
+        size.height * boardTopY,
+      );
+      final bottom = Offset(
+        size.width * (floorLeftX + (floorRightX - floorLeftX) * p),
+        size.height * boardBottomY,
+      );
       canvas.drawLine(top, bottom, lanePaint);
     }
 
@@ -2068,6 +2148,52 @@ class _PerspectiveLanePainter extends CustomPainter {
         ..color = const Color(0xffe8e4d8)
         ..strokeWidth = 4,
     );
+
+    if (perspectiveInspectionMode) {
+      BoardOutlinePainter().paint(canvas, size);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class BoardOutlinePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final topLeft = _perspectiveXAtY(floorLeftX, boardTopY);
+    final topRight = _perspectiveXAtY(floorRightX, boardTopY);
+    final outline = Path()
+      ..moveTo(size.width * topLeft, size.height * boardTopY)
+      ..lineTo(size.width * topRight, size.height * boardTopY)
+      ..lineTo(size.width * floorRightX, size.height * boardBottomY)
+      ..lineTo(size.width * floorLeftX, size.height * boardBottomY)
+      ..close();
+
+    final boundaryPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..color = Colors.redAccent;
+    canvas.drawPath(outline, boundaryPaint);
+
+    final guidePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5
+      ..color = Colors.redAccent.withValues(alpha: 0.72);
+    for (var i = 1; i < 5; i += 1) {
+      final p = i / 5;
+      canvas.drawLine(
+        Offset(
+          size.width * (topLeft + (topRight - topLeft) * p),
+          size.height * boardTopY,
+        ),
+        Offset(
+          size.width * (floorLeftX + (floorRightX - floorLeftX) * p),
+          size.height * boardBottomY,
+        ),
+        guidePaint,
+      );
+    }
   }
 
   @override
@@ -2302,13 +2428,13 @@ class BottomTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
-      (AppTab.home, 'Home', Icons.home),
-      (AppTab.music, 'Music', Icons.music_note),
-      (AppTab.character, 'Character', Icons.person_pin),
-      (AppTab.custom, 'Custom', Icons.checkroom),
-      (AppTab.quest, 'Quest', Icons.fact_check),
-      (AppTab.shop, 'Shop', Icons.shopping_cart),
-      (AppTab.settings, 'Settings', Icons.settings),
+      (AppTab.home, '홈', Icons.home),
+      (AppTab.music, '곡 선택', Icons.music_note),
+      (AppTab.character, '캐릭터', Icons.person_pin),
+      (AppTab.custom, '꾸미기', Icons.checkroom),
+      (AppTab.quest, '퀘스트', Icons.fact_check),
+      (AppTab.shop, '상점', Icons.shopping_cart),
+      (AppTab.settings, '설정', Icons.settings),
     ];
 
     return Container(
@@ -2375,7 +2501,8 @@ const songs = [
   Song(
     id: 1,
     title: '\uC65C\uACE1\uB41C \uB9AC\uB4EC',
-    subtitle: 'Distorted beat corridor',
+    subtitle: '\uB9AC\uB4EC\uC73C\uB85C \uAE68\uC5B4\uB09C \uB098',
+    thumbnailAsset: 'assets/sketch/song-thumb-1.png',
     bpm: 148,
     isLocked: false,
     difficulties: {
@@ -2392,7 +2519,8 @@ const songs = [
   Song(
     id: 2,
     title: '\uC18D\uC0AD\uC784\uC758 \uBBF8\uB85C',
-    subtitle: 'Whispering maze',
+    subtitle: '\uC18D\uC0AD\uC784\uC774 \uD750\uB974\uB294 \uAE38',
+    thumbnailAsset: 'assets/sketch/song-thumb-2.png',
     bpm: 132,
     isLocked: true,
     difficulties: {
@@ -2405,7 +2533,8 @@ const songs = [
   Song(
     id: 3,
     title: '\uBD80\uC11C\uC9C4 \uAE30\uC5B5',
-    subtitle: 'Broken memory fragments',
+    subtitle: '\uC870\uAC01\uB09C \uAE30\uC5B5\uC758 \uC794\uD5A5',
+    thumbnailAsset: 'assets/sketch/song-thumb-3.png',
     bpm: 116,
     isLocked: true,
     difficulties: {
@@ -2418,7 +2547,8 @@ const songs = [
   Song(
     id: 4,
     title: '\uB05D\uC5C6\uB294 \uD130\uB110',
-    subtitle: 'Endless tunnel pulse',
+    subtitle: '\uCD9C\uAD6C \uC5C6\uB294 \uAE34 \uD130\uB110',
+    thumbnailAsset: 'assets/sketch/song-thumb-1.png',
     bpm: 172,
     isLocked: true,
     difficulties: {
@@ -2431,7 +2561,8 @@ const songs = [
   Song(
     id: 5,
     title: '\uCE68\uBB35\uC758 \uC678\uCE68',
-    subtitle: 'Silent final signal',
+    subtitle: '\uCE68\uBB35 \uC18D\uC758 \uB9C8\uC9C0\uB9C9 \uC678\uCE68',
+    thumbnailAsset: 'assets/sketch/song-thumb-2.png',
     bpm: 154,
     isLocked: true,
     difficulties: {
@@ -2443,19 +2574,19 @@ const songs = [
   ),
 ];
 const wardrobe = [
-  WearItem('Basic Sketch', 0, true),
-  WearItem('Rough Aura', 500, false),
-  WearItem('Sharp Pulse', 700, false),
-  WearItem('Broken Line', 900, false),
-  WearItem('Dark Echo', 1200, false),
-  WearItem('Silent Vibe', 1500, false),
+  WearItem('기본 스크리블', 0, true),
+  WearItem('헤어', 500, false),
+  WearItem('장신구', 700, false),
+  WearItem('상의', 900, false),
+  WearItem('하의', 1200, false),
+  WearItem('신발', 1500, false),
 ];
 
 const quests = [
-  Quest('Play 3 songs', '500', '2 / 3', false),
-  Quest('Clear without GOOD or lower', '50', 'Done', true),
-  Quest('Reach 50 combo', '700', '34 / 50', false),
-  Quest('Buy an item in shop', '900', '0 / 1', false),
+  Quest('곡 3회 플레이', '500', '2 / 3', false),
+  Quest('GOOD 이하 없이 클리어', '50', '완료', true),
+  Quest('콤보 50 달성', '700', '34 / 50', false),
+  Quest('상점에서 아이템 구매', '900', '0 / 1', false),
 ];
 
 List<RhythmNote> buildChart({required int seed, required int bpm}) {
@@ -2524,6 +2655,6 @@ String judgeText(Judge? judge) {
     case Judge.miss:
       return 'MISS';
     case null:
-      return 'READY';
+      return '준비';
   }
 }
