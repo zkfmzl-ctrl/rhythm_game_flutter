@@ -3,8 +3,12 @@ part of '../main.dart';
 class ContainFrame extends StatelessWidget {
   const ContainFrame({required this.child, super.key});
 
-  static const designWidth = 1280.0;
-  static const designHeight = 720.0;
+  // The phone's landscape viewport is approximately 780x360 logical pixels.
+  // Match the phone's approximately 2.17:1 landscape viewport while keeping
+  // enough vertical room for the settings/quest content. This avoids the
+  // severe 0.31x scale caused by the old 1280x720 canvas.
+  static const designWidth = 1300.0;
+  static const designHeight = 600.0;
 
   final Widget child;
 

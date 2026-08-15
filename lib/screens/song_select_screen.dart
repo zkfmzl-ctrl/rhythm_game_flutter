@@ -354,7 +354,6 @@ class _SongDetailPanel extends StatelessWidget {
             _StartButton(enabled: !song.isLocked, onTap: onStart),
           ],
         ),
-      ),
     );
   }
 }

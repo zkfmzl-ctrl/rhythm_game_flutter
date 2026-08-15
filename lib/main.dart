@@ -202,7 +202,7 @@ class _RhythmGameHomeState extends State<RhythmGameHome> {
               top: true,
               bottom: true,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(18, 54, 18, 84),
+                padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
                 child: currentScreen(),
               ),
             ),

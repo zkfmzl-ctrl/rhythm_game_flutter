@@ -54,7 +54,6 @@ class ShopScreen extends StatelessWidget {
                 ),
               ],
             ),
-          ),
         ),
         const SizedBox(width: 12),
         Expanded(
