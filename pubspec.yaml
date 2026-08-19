@@ -1,0 +1,48 @@
+name: distorted_rhythm
+description: A sketch-style 2D character rhythm game prototype.
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  audioplayers: ^6.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/backgrounds/
+    - assets/character/
+    - assets/items/cloth/
+    - assets/items/hair/
+    - assets/items/hand/
+    - assets/items/shoe/
+    - assets/items/efect/
+    - assets/items/jin/
+    - assets/buttons/
+    - assets/notes/
+    - assets/music/
+    - assets/ui/refs/
+    - assets/sketch/
+  fonts:
+    - family: NotoSansKR
+      fonts:
+        # a real variable font (wght axis 100-900) — Flutter instantiates
+        # the correct weight straight from the font's own outlines, so
+        # nothing here is synthesized/faux-bolded the way Gungsuh was.
+        - asset: assets/fonts/NotoSansKR.ttf
+        - asset: assets/fonts/NotoSansKR.ttf
+          weight: 700
+        - asset: assets/fonts/NotoSansKR.ttf
+          weight: 900
+    - family: WaegokScratch
+      fonts:
+        - asset: assets/fonts/WaegokScratch.ttf
